@@ -15,6 +15,7 @@ class CaseInfoWindow(QMainWindow, Ui_CaseInfoWindow):
 
         self.ciw_nextButton.clicked.connect(self.open_newHostWindow)
 
+
     
     @Slot()
     def open_newHostWindow(self):

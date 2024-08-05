@@ -16,6 +16,8 @@ class NewHostWindow(QMainWindow, Ui_NewDataSourceWindow):
 
         self.nhw_NextButton.clicked.connect(self.open_NewTypeWindow)
 
+        
+
     @Slot()
     def open_NewTypeWindow(self):
         self.newTypeWindow = NewTypeWindow()

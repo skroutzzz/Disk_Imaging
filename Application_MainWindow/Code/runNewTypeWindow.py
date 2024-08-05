@@ -16,6 +16,8 @@ class NewTypeWindow(QMainWindow, Ui_NewTypeWindow):
 
         self.ntw_nextButton.clicked.connect(self.open_IngestModuleWindow)
 
+        
+
     @Slot()
     def open_IngestModuleWindow(self):
         self.ingestModuleWindow = IngestModuleWindow()

@@ -16,6 +16,8 @@ class IngestModuleWindow(QMainWindow, Ui_IngestModuleWindow):
 
         self.imw_nextButton.clicked.connect(self.open_SelectDataWindow)
 
+    
+
     @Slot()
     def open_SelectDataWindow(self):
         self.selectDataWindow = SelectDataWindow()

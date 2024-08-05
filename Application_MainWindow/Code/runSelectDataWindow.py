@@ -15,6 +15,7 @@ class SelectDataWindow(QMainWindow, Ui_SelectDataWindow):
         self.setupUi(self)
 
         self.sdw_nextButton.clicked.connect(self.open_ProgressWindow)
+        
 
 
     @Slot()
