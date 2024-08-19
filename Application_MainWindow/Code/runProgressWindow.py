@@ -85,7 +85,19 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to determine the size of the {device}.\nError: {str(e)}")
             return None
-        
+    
+    def calculate_hashes(self, filepath, hash_algorithms):
+
+        try:
+            hashers = {alg: hashlib.new(alg) for alg in hash_algorithms}
+            with open(filepath, 'rb') as f:
+                for block in iter(lambda: f.read(4096), b""):
+                    for hasher in hashers.values():
+                        hasher.update(block)
+            return {alg: hasher.hexdigest() for alg, hasher in hasher.items()}
+        except Exception as e:
+            print(f"Error during hashing of {filepath}: {str(e)}")
+            return None
         
     Slot()
     def run_dd_command(self):
@@ -147,7 +159,7 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.MergedChannels)
         self.process.readyReadStandardOutput.connect(self.update_progress)
-        self.process.finished.connect(lambda: self.on_process_finished(output_file))
+        self.process.finished.connect(lambda: self.on_imaging_finished(output_file))
 
         self.pw_progressBar.setValue(0)
         self.pw_progressBar.setVisible(True)
@@ -171,27 +183,45 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
                             progress_percentage = (copied_mb / self.target_size_mb) *100
                             self.pw_progressBar.setValue(int(progress_percentage))
 
+    @Slot()
+    def on_imaging_finished(self, output_file):
+        self.pw_progressBar.setValue(100)
+        self.pw_progressBar.setVisible(False)
+
+        size_bytes = self.get_device_size(output_file)
+        if size_bytes is None:
+            QMessageBox.critical(self, "Error", "Failed to determine the size of the output file")
+            return
+        
+        self.pw_progressBar.setValue(0)
+        self.pw_progressBar.setVisible(True)
+        self.statusBar().showMessage("Calculating output file hashes...")
+
+        self.hashing_worker = HashingWorker(output_file, ['md5', 'sha256'], size_bytes)
+        self.hashing_worker.hash_calculated.connect(self.on_output_hashes_calculated)
+        self.hashing_worker.progress_update.connect(self.pw_progressBar.setValue)
+        self.hashing_worker.start()
+
 
 
                      
 
     @Slot()
-    def on_process_finished(self, output_file):
-        self.pw_progressBar.setValue(100)
-        self.pw_progressBar.setVisible(False)
-
-        image_hashes = self.calculate_hashes(output_file, ['md5', 'sha256'])
-        if image_hashes is None:
+    def on_output_hashes_calculated(self, hashes):
+        
+        if hashes is None:
+            QMessageBox.critical(self, "Error", "Failed to calculated output file hashes.")
             return
-        print(f"Image MD5: {image_hashes['md5']}")
-        print(f"Image SHA256: {image_hashes['sha256']}")
+
+        print(f"Image MD5: {hashes['md5']}")
+        print(f"Image SHA256: {hashes['sha256']}")
 
         QMessageBox.information(self, "Imaging Complete", 
                                 f"Imaging and hashing are complete.\n\n"
                                 f"Source MD5: {self.source_hashes['md5']}\n"
                                 f"Source SHA256: {self.source_hashes['sha256']}\n\n"
-                                f"Image MD5: {image_hashes['md5']}\n"
-                                f"Image SHA256: {image_hashes['sha256']}")
+                                f"Image MD5: {hashes['md5']}\n"
+                                f"Image SHA256: {hashes['sha256']}")
 
         QMessageBox.information(self, "Success", "dd command completed successfully!")
        
