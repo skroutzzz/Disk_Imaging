@@ -15,8 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFormLayout, QGridLayout, QGroupBox,
-    QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout, QGridLayout,
+    QGroupBox, QHBoxLayout, QLabel, QMainWindow,
     QMenuBar, QPushButton, QSizePolicy, QSpacerItem,
     QStatusBar, QWidget)
 
@@ -62,24 +62,19 @@ class Ui_SelectDataWindow(object):
         self.sdw_groupBox.setObjectName(u"sdw_groupBox")
         self.formLayout = QFormLayout(self.sdw_groupBox)
         self.formLayout.setObjectName(u"formLayout")
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.formLayout.setItem(2, QFormLayout.LabelRole, self.verticalSpacer)
+
         self.sdw_browseLabel = QLabel(self.sdw_groupBox)
         self.sdw_browseLabel.setObjectName(u"sdw_browseLabel")
 
         self.formLayout.setWidget(1, QFormLayout.LabelRole, self.sdw_browseLabel)
 
-        self.sdw_browseEdit = QLineEdit(self.sdw_groupBox)
-        self.sdw_browseEdit.setObjectName(u"sdw_browseEdit")
+        self.sdw_comboBox = QComboBox(self.sdw_groupBox)
+        self.sdw_comboBox.setObjectName(u"sdw_comboBox")
 
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.sdw_browseEdit)
-
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.formLayout.setItem(3, QFormLayout.LabelRole, self.verticalSpacer)
-
-        self.sdw_browseButton = QPushButton(self.sdw_groupBox)
-        self.sdw_browseButton.setObjectName(u"sdw_browseButton")
-
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.sdw_browseButton)
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.sdw_comboBox)
 
 
         self.gridLayout.addWidget(self.sdw_groupBox, 0, 0, 1, 2)
@@ -105,7 +100,6 @@ class Ui_SelectDataWindow(object):
         self.sdw_finishButton.setText(QCoreApplication.translate("SelectDataWindow", u"Finish", None))
         self.sdw_cancelButton.setText(QCoreApplication.translate("SelectDataWindow", u"Cancel", None))
         self.sdw_groupBox.setTitle(QCoreApplication.translate("SelectDataWindow", u"Select Data Source", None))
-        self.sdw_browseLabel.setText(QCoreApplication.translate("SelectDataWindow", u"Browse for an image file:", None))
-        self.sdw_browseButton.setText(QCoreApplication.translate("SelectDataWindow", u"Browse", None))
+        self.sdw_browseLabel.setText(QCoreApplication.translate("SelectDataWindow", u"Browse for a device:", None))
     # retranslateUi
 

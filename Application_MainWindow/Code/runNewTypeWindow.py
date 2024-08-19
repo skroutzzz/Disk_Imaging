@@ -10,24 +10,28 @@ from runIngestModuleWindow import IngestModuleWindow
 
 
 class NewTypeWindow(QMainWindow, Ui_NewTypeWindow):
-    def __init__(self):
+    def __init__(self, case_info):
         super(NewTypeWindow, self).__init__()
         self.setupUi(self)
+        self.case_info = case_info
 
-        self.ntw_nextButton.clicked.connect(self.open_IngestModuleWindow)
+        self.ntw_nextButton.clicked.connect(self.store_selection_and_open_ingest_module_window)
 
         
+    def store_selection_and_open_ingest_module_window(self):
+        self.case_info['disk_type'] = 'local_disk' if self.ntw_localDiskButton.isChecked() else 'other'
 
-    @Slot()
-    def open_IngestModuleWindow(self):
-        self.ingestModuleWindow = IngestModuleWindow()
-        self.ingestModuleWindow.show()
+        from runIngestModuleWindow import IngestModuleWindow
+        self.ingest_module_window = IngestModuleWindow(self.case_info)
+        self.ingest_module_window.show()
         self.close()
+
 
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    newType_window = NewTypeWindow()
+    case_info = {}
+    newType_window = NewTypeWindow({})
     newType_window.show()
     sys.exit(app.exec())

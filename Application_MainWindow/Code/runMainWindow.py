@@ -191,6 +191,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__()
         self.setupUi(self)
 
+        self.mw_mediaButton.clicked.connect(self.run_dd_command)
+
         self.mw_newCaseButton.clicked.connect(self.open_caseInfoWindow)
         self.mw_addDataSourceButton.clicked.connect(self.open_newHostWindow)
         self.mw_openCaseButton.clicked.connect(self.open_image)
@@ -254,6 +256,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         path_parts = path.strip('/').split('/')
         return find_directory(self.files, path_parts)
+    
+    @Slot()
+    def run_dd_command(self):
+        source_device = "/dev/sdb"
+        output_file = "/home/skroutz/Documents/Case/output.img"
+        block_size = "4M"
+        
+
+        command = ['dd', f'if={source_device}', f'of={output_file}', f'bs={block_size}']
+        
+        try: 
+            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            if result.returncode == 0:
+                QMessageBox.information(self, "Success", f"dd command executed successfully!\n Output saved to: {output_file}")
+            else:
+                QMessageBox.warning(self, "Error", f"dd command failed:\n{result.stderr}")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occured while running command:\n{str(e)}")
 
     @Slot()
     def open_caseInfoWindow(self):

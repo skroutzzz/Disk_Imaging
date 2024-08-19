@@ -10,13 +10,24 @@ from runSelectDataWindow import SelectDataWindow
 
 
 class IngestModuleWindow(QMainWindow, Ui_IngestModuleWindow):
-    def __init__(self):
+    def __init__(self, case_info):
         super(IngestModuleWindow, self).__init__()
         self.setupUi(self)
+        self.case_info = case_info
 
-        self.imw_nextButton.clicked.connect(self.open_SelectDataWindow)
+        
 
-    
+        self.imw_nextButton.clicked.connect(self.store_selections_and_open_select_data_window)
+
+    def store_selections_and_open_select_data_window(self):
+        self.case_info['md5'] = self.imw_md5Checkbox.isChecked()
+        self.case_info['sha256'] = self.imw_shaCheckbox.isChecked()
+        self.case_info['verification'] = self.imw_verificationCheckbox.isChecked()
+
+        from runSelectDataWindow import SelectDataWindow
+        self.select_data_window = SelectDataWindow(self.case_info)
+        self.select_data_window.show()
+        self.close()
 
     @Slot()
     def open_SelectDataWindow(self):
@@ -27,6 +38,7 @@ class IngestModuleWindow(QMainWindow, Ui_IngestModuleWindow):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ingestModule_window = IngestModuleWindow()
+    case_info = {}
+    ingestModule_window = IngestModuleWindow({})
     ingestModule_window.show()
     sys.exit(app.exec())
