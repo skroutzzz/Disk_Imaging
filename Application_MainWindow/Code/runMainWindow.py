@@ -6,6 +6,8 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTreeView,
 from PySide6.QtCore import Slot, Qt, QModelIndex, QThread, Signal
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 
+from case_info import CaseInfo
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from UI.MainWindow import Ui_MainWindow
@@ -187,9 +189,10 @@ class TextWorker(QThread):
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, case_info: CaseInfo):
         super(MainWindow, self).__init__()
         self.setupUi(self)
+        self.case_info = case_info
 
         self.mw_mediaButton.clicked.connect(self.run_dd_command)
 
@@ -279,7 +282,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot()
     def open_caseInfoWindow(self):
-        self.caseWindow = CaseInfoWindow()
+        self.caseWindow = CaseInfoWindow(case_info)
         self.caseWindow.show()
 
     @Slot()
@@ -344,6 +347,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    main_window = MainWindow()
+    case_info = CaseInfo()
+    main_window = MainWindow(case_info)
     main_window.show()
     sys.exit(app.exec())

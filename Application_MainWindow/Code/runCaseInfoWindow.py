@@ -30,17 +30,18 @@ class CaseInfoWindow(QMainWindow, Ui_CaseInfoWindow):
             self.ciw_baseEdit.setText(directory)
 
     def store_user_input_and_open_new_type_window(self):      
-        self.case_info.case_name = self.ciw_caseNameEdit.text().strip(),
-        self.case_info.base_directory = self.ciw_baseEdit.text().strip(),
-        self.case_info.case_number = self.lineEdit_3.text().strip(),
-        self.case_info.examiner_name = self.ciw_examinerNameEdit.text().strip(),
-        self.case_info.examiner_phone = self.ciw_examinerPhoneEdit.text().strip(),
-        self.case_info.examiner_email = self.ciw_examinerEmailEdit.text().strip(),
+        self.case_info.case_name = self.ciw_caseNameEdit.text().strip()
+        self.case_info.base_directory = self.ciw_baseEdit.text().strip()
+        self.case_info.case_number = self.lineEdit_3.text().strip()
+        self.case_info.examiner_name = self.ciw_examinerNameEdit.text().strip()
+        self.case_info.examiner_phone = self.ciw_examinerPhoneEdit.text().strip()
+        self.case_info.examiner_email = self.ciw_examinerEmailEdit.text().strip()
         self.case_info.notes = self.ciw_notesEdit.text().strip()
 
         print(f"Type of ciw_caseNameEdit: {type(self.ciw_caseNameEdit)}")
         print(f"Case Name after strip: '{self.case_info.case_name}'")
         print(f"Directory after strip: '{self.case_info.base_directory}'")
+        print(f"Base Directory: {self.case_info.base_directory} (Type: {type(self.case_info.base_directory)})")
 
         try:
             print("Attempting to validate...")

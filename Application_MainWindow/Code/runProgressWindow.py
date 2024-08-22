@@ -5,6 +5,7 @@ import hashlib
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PySide6.QtCore import QThread, Signal, QProcess, Slot
 import subprocess
+from case_info import CaseInfo
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -53,11 +54,13 @@ class HashingWorker(QThread):
 
 
 class ProgressWindow(QMainWindow, Ui_ProgresWindow):
-    def __init__(self):
+    def __init__(self, case_info: CaseInfo):
         super(ProgressWindow, self).__init__()
         self.setupUi(self)
-
+        self.case_info = case_info
         
+
+        print(f"Base Directory: {self.case_info.base_directory} (Type: {type(self.case_info.base_directory)})")
         self.target_size_mb = None
         self.source_hashes = None
         self.pw_backButton.clicked.connect(self.run_dd_command)
@@ -101,9 +104,9 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
         
     Slot()
     def run_dd_command(self):
-        source_device = "/dev/sdb"  # Adjust this to the correct source disk
-        output_file = "/home/skroutz/Documents/Case/disk_image.img"  # Adjust this to the correct destination path
-        block_size = "4M"
+        source_device = self.case_info.source_disk  # Adjust this to the correct source disk
+        #output_file = os.path.join(self.case_info.base_directory, "disk_image.img")  # Adjust this to the correct destination path
+        #block_size = "4M"
 
         if not os.path.exists(source_device):
             QMessageBox.critical(self, "Error", f"The source device or file {source_device} does not exist")
@@ -114,17 +117,18 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
         if size_bytes is None:
             return
         
-        
-
-        #command = ['if=' + source_device, 'of=' + output_file, 'bs=' + block_size, 'status=progress']
-
+        hash_algorithms = []
+        if self.case_info.hash_algorithms['md5']:
+            hash_algorithms.append('md5')
+        if self.case_info.hash_algorithms['sha256']:
+            hash_algorithms.append('sha256')
         
 
         self.pw_progressBar.setValue(0)
         self.pw_progressBar.setVisible(True)
         self.statusBar().showMessage("Calculating source disk hashes...")
 
-        self.hashing_worker = HashingWorker(source_device, ['md5', 'sha256'], size_bytes)
+        self.hashing_worker = HashingWorker(source_device, hash_algorithms, size_bytes)
         self.hashing_worker.hash_calculated.connect(self.on_source_hashes_calculated)
         self.hashing_worker.progress_update.connect(self.pw_progressBar.setValue)
         self.hashing_worker.start()
@@ -150,8 +154,8 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
         self.start_imaging_process()
 
     def start_imaging_process(self):
-        source_device = "/dev/sdb"  # Adjust this to the correct source disk
-        output_file = "/home/skroutz/Documents/Case/disk_image.img"  # Adjust this to the correct destination path
+        source_device = self.case_info.source_disk  # Adjust this to the correct source disk
+        output_file = os.path.join(self.case_info.base_directory, "disk_image.img")  # Adjust this to the correct destination path
         block_size = "4M"
 
         command = ['if=' + source_device, 'of=' + output_file, 'bs=' + block_size, 'status=progress']
@@ -197,7 +201,13 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
         self.pw_progressBar.setVisible(True)
         self.statusBar().showMessage("Calculating output file hashes...")
 
-        self.hashing_worker = HashingWorker(output_file, ['md5', 'sha256'], size_bytes)
+        hash_algorithms = []
+        if self.case_info.hash_algorithms['md5']:
+            hash_algorithms.append('md5')
+        if self.case_info.hash_algorithms['sha256']:
+            hash_algorithms.append('sha256')
+
+        self.hashing_worker = HashingWorker(output_file, hash_algorithms, size_bytes)
         self.hashing_worker.hash_calculated.connect(self.on_output_hashes_calculated)
         self.hashing_worker.progress_update.connect(self.pw_progressBar.setValue)
         self.hashing_worker.start()
@@ -213,15 +223,15 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
             QMessageBox.critical(self, "Error", "Failed to calculated output file hashes.")
             return
 
-        print(f"Image MD5: {hashes['md5']}")
-        print(f"Image SHA256: {hashes['sha256']}")
+        print(f"Image MD5: {hashes.get('md5', 'Not Calculated')}")
+        print(f"Image SHA256: {hashes.get('sha256', 'Not Calculated')}")
 
         QMessageBox.information(self, "Imaging Complete", 
                                 f"Imaging and hashing are complete.\n\n"
-                                f"Source MD5: {self.source_hashes['md5']}\n"
-                                f"Source SHA256: {self.source_hashes['sha256']}\n\n"
-                                f"Image MD5: {hashes['md5']}\n"
-                                f"Image SHA256: {hashes['sha256']}")
+                                f"Source MD5: {self.source_hashes.get('md5', 'Not Calculated')}\n"
+                                f"Source SHA256: {self.source_hashes.get('sha256', 'Not Calculated')}\n\n"
+                                f"Image MD5: {hashes.get('md5', 'Not Calculated')}\n"
+                                f"Image SHA256: {hashes.get('sha256', 'Not Calculated')}")
 
         QMessageBox.information(self, "Success", "dd command completed successfully!")
        
@@ -229,6 +239,7 @@ class ProgressWindow(QMainWindow, Ui_ProgresWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     
-    progress_window = ProgressWindow()
+    case_info = CaseInfo()
+    progress_window = ProgressWindow(case_info)
     progress_window.show()
     sys.exit(app.exec())
